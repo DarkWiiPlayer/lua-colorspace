@@ -18,6 +18,20 @@ local function nmax(fn, ...)
   return n, max
 end
 
+local function map(fn, a, ...)
+  if a then
+    return fn(a), map(fn, ...)
+  end
+end
+
+local function hex2num255(str)
+  return tonumber(str, 16) / 255
+end
+
+local function hex2num15(str)
+  return tonumber(str, 16) / 15
+end
+
 --- Converts from HSL colorspace to RGB colorspace.
 -- Additional arguments are passed through,
 -- meaning this function doubles as a hsla2rgba converter.
@@ -76,6 +90,23 @@ function colorspace.rgb2hsl(r, g, b, ...)
   end
 
   return h, s, l, ...
+end
+
+--- Converts hex strings to an RGB tuple.
+function colorspace.hex2rgb(str)
+  local r, g, b, a
+  r, g, b, a = map(hex2num255, str:match('^#?(%x%x)(%x%x)(%x%x)(%x%x)$'))
+  if not r then
+    r, g, b = map(hex2num255, str:match('^#?(%x%x)(%x%x)(%x%x)$'))
+  end
+  if not r then
+    r, g, b, a = map(hex2num15, str:match('^#?(%x)(%x)(%x)(%x)$'))
+  end
+  if not r then
+    r, g, b = map(hex2num15, str:match('^#?(%x)(%x)(%x)$'))
+  end
+
+  return r, g, b, a
 end
 
 return colorspace
